@@ -1,0 +1,28 @@
+{
+    "name": "speedwork/bootstrap",
+    "description": "Bootstrap widgets.",
+    "type": "speedwork-widget",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sankar",
+            "email": "sankar.suda@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "speedwork/installer" : "dev-master"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "bower install bootstrap-timepicker -FSp",
+            "bower install moment -FSp",
+            "bower install eonasdan-bootstrap-datetimepicker#latest -FSp"
+        ],
+        "post-update-cmd": [
+            "bower update bootstrap-timepicker -FSp",
+            "bower update eonasdan-bootstrap-datetimepicker#latest -FSp",
+            "bower update moment -FSp",
+        ]
+    }
+}

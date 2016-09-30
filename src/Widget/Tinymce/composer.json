@@ -1,0 +1,24 @@
+{
+    "name": "speedwork/tinymce",
+    "description": "tinymce widget convert HTML TEXTAREA fields or other HTML elements to WYSIWYG editor.",
+    "type": "speedwork-widget",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sankar",
+            "email": "sankar.suda@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "speedwork/installer" : "dev-master"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "bower install tinymce#~4.1.9 -FSp",
+        ],
+        "post-update-cmd": [
+            "bower update tinymce#~4.1.9 -FSp"
+        ]
+    }
+}

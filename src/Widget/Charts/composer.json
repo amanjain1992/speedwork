@@ -1,0 +1,16 @@
+{
+    "name": "speedwork/charts",
+    "description": "charts widget is base class for all chart widget classes.",
+    "type": "speedwork-widget",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sankar",
+            "email": "sankar.suda@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "speedwork/installer" : "dev-master"
+    }
+}

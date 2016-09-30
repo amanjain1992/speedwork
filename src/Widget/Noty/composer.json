@@ -1,0 +1,24 @@
+{
+    "name": "speedwork/noty",
+    "description": "noty widget makes it easy to create alert, success, error etc. messages as an alternative to standard alert dialog",
+    "type": "speedwork-widget",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sankar",
+            "email": "sankar.suda@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "speedwork/installer" : "dev-master"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "bower install noty#2.3.5-FSp",
+        ],
+        "post-update-cmd": [
+            "bower update noty#2.3.5 -FSp"
+        ]
+    }
+}

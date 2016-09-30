@@ -1,0 +1,28 @@
+{
+    "name": "turbophp/speedwork",
+    "type": "library",
+    "description": "Speedwork default components and widgets",
+    "license": "MIT",
+    "authors": [{
+        "name": "sankar",
+        "email": "sankar.suda@gmail.com"
+    }],
+    "require": {
+        "php": ">=5.6",
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~5.5",
+        "satooshi/php-coveralls": "2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Turbo\\Speedwork\\": "src",
+        }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "name": "speedwork/jui",
+    "description": "jquery-ui widget for speedwork framework",
+    "type": "speedwork-widget",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sankar",
+            "email": "sankar.suda@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "speedwork/installer" : "dev-master"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "bower install jquery-ui#~1.11.4 -FSp",
+        ],
+        "post-update-cmd": [
+            "bower update jquery-ui#~1.11.4 -FSp"
+        ]
+    }
+}
