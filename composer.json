@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Turbo\\Speedwork\\": "src",
+            "Turbo\\Speedwork\\": "src"
         }
     },
     "minimum-stability": "dev",
