@@ -22,7 +22,7 @@ class Bootstrap extends Widget
 {
     public function beforeRun()
     {
-        $this->get('assets')->addScript('bootstrap/dist/js/bootstrap.min.js', 'bower');
+        $this->get('assets')->addScript('static::bootstrap/dist/js/bootstrap.min.js');
     }
 
     public function run()

@@ -18,31 +18,35 @@ use Speedwork\Core\Controller as BaseController;
  */
 class Controller extends BaseController
 {
-    /**
-     * Index Function.
-     *
-     * @return List of Signatures
-     */
     public function index()
     {
+        $task = $this->input('task');
+        $noty = $this->getHelper('notify.noty');
+
+        if ($task == 'mark') {
+            $id = $this->query('id');
+            $noty->mark($id);
+
+            return [
+                'status' => 'OK',
+            ];
+        }
+
         // Get data for searching.
-        $data = &$this->get;
-
-        // Condition.
-        $conditions = $this->get('resolver')->conditions($data);
-
-        // Ordered by.
-        $order = $this->get('resolver')->ordering($data, ['id DESC']);
+        $order      = $this->ordering($this->input(), ['id DESC']);
+        $conditions = $this->conditions($this->input());
 
         // List the notifications.
-        $rows = $this->database->paginate(
-            '#__notifications', 'all', [
-                'conditions' => $conditions,
-                'order'      => $order,
-                ]
-        );
+        $rows = $this->database->paginate('#__notifications', 'all', [
+            'conditions' => $conditions,
+            'order'      => $order,
+        ]);
 
-        $this->ajaxRequest('index.php?option=noty', $rows['total']);
+        foreach ($rows['data'] as &$row) {
+            $row = $noty->format($row);
+        }
+        $this->session->set('notification_count', 0);
+        $this->ajax('index.php?option=noty', $rows['total']);
 
         return [
             'rows' => $rows,
@@ -50,56 +54,52 @@ class Controller extends BaseController
     }
 
     /**
-     * Add function.
+     * Index Function.
      *
-     * @return Status
+     * @return List of Signatures
      */
-    public function add()
+    public function recent()
     {
-        $task = $this->post['task'];
-        $id   = $this->post['id'];
+        // Get data for searching.
+        $data = $this->input();
 
-        $status = [];
+        $order        = $this->get('resolver')->ordering($data, ['id DESC']);
+        $conditions   = $this->get('resolver')->conditions($data);
+        $conditions[] = ['status' => 0];
 
-        if ($task == 'save') {
-            $save = $this->post['data'];
+        // List the notifications.
+        $rows = $this->database->find('#__notifications', 'all', [
+            'conditions' => $conditions,
+            'order'      => $order,
+            'limit'      => 10,
+        ]);
 
-            $status = [];
+        $noty = $this->get('resolver')->helper('notify.noty');
 
-            // If action is editing, update the announcement.
-            if ($id) {
-                $res = $this->database->update('#__notifications', $save, ['id' => $id]);
-                // Checking any errors is there.
-                $status['status']  = ($res) ? 'OK' : 'ERROR';
-                $status['message'] = ($res) ? trans('Announcement updated Successfully') : trans('Some Error Occured');
-            } else {
-                // Else add new.
-                $save['created'] = time();
-
-                // Add new notification if not already exists.
-                $res = $this->database->save('#__notifications', $save);
-                // Checking any errors is there.
-                $status['status']  = ($res) ? 'OK' : 'ERROR';
-                $status['message'] = ($res) ? trans('Announcement added Successfully') : trans('Some Error Occured');
-            }
-
-            // Return the status to display.
-            return $status;
+        $id = [];
+        foreach ($rows as &$row) {
+            $row  = $noty->format($row);
+            $id[] = $row['id'];
         }
 
-        // Get details to edit it.
-        $id = $this->get['id'];
-        if (isset($id)) {
-            $row = $this->database->find('#__notifications', 'first', [
-                'conditions' => ['id' => $id],
-                ]
-            );
-
-            // Assign signature details for editing.
-            return [
-                'row' => $row,
-            ];
+        if (!empty($id)) {
+            $noty->mark($id);
+            $this->session->set('notification_count', 0);
         }
+
+        return [
+            'rows'  => $rows,
+            'total' => count($rows),
+        ];
+    }
+
+    public function unread()
+    {
+        $noty = $this->get('resolver')->helper('notify.noty');
+
+        return [
+            'count' => intval($noty->unreadCount()),
+        ];
     }
 
     /**
@@ -109,70 +109,15 @@ class Controller extends BaseController
      */
     public function delete()
     {
-        $id = $this->get['id'];
+        $id = $this->query('id');
 
-        $res = $this->database->delete(
-            '#__notifications', ['id' => $id]
+        $this->database->update('#__notifications',
+            ['status' => 1, 'modified' => time()], ['id' => $id]
         );
 
-        $status = [];
-
-        $status['status']  = ($res) ? 'OK' : 'ERROR';
-        $status['message'] = ($res) ? trans('Announcement deleted successfully..') : trans('An error occured While deleting');
+        $status           = [];
+        $status['status'] = 'OK';
 
         return $status;
-    }
-
-    public function notifys()
-    {
-        $notifications = $this->get('resolver')->helper('notify.noty');
-
-        $rows = $notifications->listNotes();
-
-        $data = [];
-        if ($rows) {
-            foreach ($rows as &$row) {
-                $row['posted'] = date('Y-m-d', $row['created']);
-            }
-            $data['count'] = count($rows);
-            $data['list']  = $rows;
-        } else {
-            $data['count'] = 0;
-        }
-
-        return [
-            'rows' => $data,
-        ];
-    }
-
-    public function allnotes()
-    {
-        $joins   = [];
-        $joins[] = [
-            'table'      => '#__notification_status',
-            'alias'      => 's',
-            'type'       => 'LEFT',
-            'conditions' => ['s.fkuserid' => $this->userid, 'n.id = s.noty_id'],
-        ];
-
-        $rows = $this->database->paginate(
-            '#__notifications', 'all', [
-                'alias'      => 'n',
-                'conditions' => ['n.status' => 1, 's.fkuserid IS NULL'],
-                'fields'     => ['n.*', 's.created as read'],
-                'order'      => ['n.created DESC'],
-                'limit'      => 10,
-                'joins'      => $joins,
-            ]
-        );
-
-        $this->database->update('#__notification_status', ['status' => 1]);
-
-        // Assign data.
-        $this->ajaxRequest('index.php?option=noty&view=allnotes', $rows['total']);
-
-        return [
-            'rows' => $rows,
-        ];
     }
 }

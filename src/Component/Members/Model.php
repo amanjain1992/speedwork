@@ -101,7 +101,7 @@ class Model extends BaseModel
             $save['username'] = $this->generateUsername($save['email']);
         }
 
-        if (config('auth.role')) {
+        if (config('auth.role_id')) {
             $save['role_id'] = $role_id;
         }
 
@@ -129,13 +129,13 @@ class Model extends BaseModel
         }
 
         //call the hooks
-        $this->dispatch('event.members.after.register', [
+        $this->fire('event.members.after.register', [
             'userid'  => $userid,
             'user'    => $save,
             'role_id' => $role_id,
         ]);
 
-        if ($role_id && !config('auth.power')) {
+        if ($role_id && !config('auth.role_id')) {
             $this->database->save('#__user_to_role', [
                 'user_id' => $userid, 'role_id' => $role_id,
             ]);
@@ -144,6 +144,10 @@ class Model extends BaseModel
         $emailhelper = $this->get('resolver')->helper('email');
         $encryption  = $this->get('resolver')->helper('encryption');
         $smshelper   = $this->get('resolver')->helper('sms');
+
+        if ($config['mail_otp_activation']) {
+            return $this->sendActivateOtp($save, $save['activation_key']);
+        }
 
         $mail_username = [];
         foreach ($config['login_fields'] as $fields) {
@@ -339,8 +343,8 @@ class Model extends BaseModel
     {
         if ($signature) {
             //time based signature validation
-            $sign = base64_decode(urldecode($this->get['s']));
-            $time = base64_decode(urldecode($this->get['t']));
+            $sign = base64_decode(urldecode($this->query('s')));
+            $time = base64_decode(urldecode($this->query('t')));
             $key  = trim(md5(strtoupper(config('app.service').env('HTTP_HOST').$time)));
             if ($sign != $key || (($time + 30) < time())) {
                 return [
@@ -351,9 +355,9 @@ class Model extends BaseModel
         }
 
         //rsa decrypt
-        $public = base64_decode(urldecode($this->get['k']));
-        $data   = base64_decode(urldecode($this->get['d']));
-        $user   = base64_decode(urldecode($this->get['a']));
+        $public = base64_decode(urldecode($this->query('k')));
+        $data   = base64_decode(urldecode($this->query('d')));
+        $user   = base64_decode(urldecode($this->query('a')));
 
         //get token info from db
         $row = $this->database->find('#__user_auth_token', 'first', [
@@ -414,5 +418,143 @@ class Model extends BaseModel
         $login_url .= '&a='.urlencode(base64_encode($info['account_id']));
 
         return $login_url;
+    }
+
+    /**
+     * Send token over mail to verify password change request.
+     *
+     * @param [type] $row [description]
+     *
+     * @return [type] [description]
+     */
+    public function sendTokenMail($row)
+    {
+        $emailhelper = $this->getHelper('email');
+        $email       = $row['email'];
+
+        $pwd_token = $this->get('session')->get('pwd_verify_token');
+
+        $mailsubject = 'Password Recovery Mail';
+
+        $tags             = [];
+        $tags['name']     = $row['name'];
+        $tags['username'] = $row['username'];
+        $tags['email']    = $email;
+        $tags['user']     = $row;
+        $tags['token']    = $pwd_token;
+
+        $sendEmail = $emailhelper->sendEmail(
+            [
+            'tags'     => $tags,
+            'to'       => $email,
+            'subject'  => $mailsubject,
+            'template' => 'email_pwtoken_verify.tpl',
+            ]
+        );
+
+        if ($sendEmail) {
+            $status['status']  = 'OK';
+            $status['message'] = trans('Password reset token sent to your registered email address.');
+
+            $status['redirect'] = $this->link('members/verifytoken');
+
+            return $status;
+        } else {
+            $status['status']  = 'ERROR';
+            $status['message'] = trans('Oops an error occured while sending an email. Please try again.');
+
+            return $status;
+        }
+    }
+
+    /**
+     * Send OTP to both email and Sms.
+     *
+     * @param [type] $data [description]
+     * @param [type] $code [description]
+     *
+     * @return [type] [description]
+     */
+    public function sendActivateOtp($data, $code)
+    {
+        $config      = config('auth.account');
+        $emailhelper = $this->get('resolver')->helper('email');
+        $encryption  = $this->get('resolver')->helper('encryption');
+        $smshelper   = $this->get('resolver')->helper('sms');
+
+        $url = 'members/activate';
+        $url .= '?u='.$encryption->encrypt($data['userid']).'&k='.$data['activation_key'].'&t='.$encryption->encrypt(time());
+
+        if ($config['mail_otp_activation'] && $config['sms_activation']) {
+            $subject = 'One Time Password Account Activation';
+
+            $tags         = [];
+            $tags['user'] = $data;
+            $tags['otp']  = $code;
+
+            $sendMail = $emailhelper->sendEmail([
+                'tags'     => $tags,
+                'to'       => $data['email'],
+                'template' => 'email_send_activate_otp.tpl',
+                'subject'  => $subject,
+                ]
+            );
+
+            $message = trans("Thank you for registering with :0. Your activation key is ':1'.", [_SITENAME, $data['activation_key']]);
+
+            $sendSms = $smshelper->sendSms([
+                'to'      => $save['mobile'],
+                'message' => $message,
+            ]);
+
+            if ($sendMail && $sendSms) {
+                $status             = [];
+                $status['status']   = 'OK';
+                $status['message']  = trans('OTP has been sent to '.$data['email'].'&'.$data['mobile']);
+                $status['redirect'] = $this->link($url);
+
+                return $status;
+            }
+        }
+
+        if ($config['mail_otp_activation'] && !$config['sms_activation']) {
+            //echo 'I am here';
+            $subject = 'One Time Password Account Activation';
+
+            $tags         = [];
+            $tags['user'] = $data;
+            $tags['otp']  = $code;
+
+            $sendMail = $emailhelper->sendEmail([
+                'tags'     => $tags,
+                'to'       => $data['email'],
+                'template' => 'email_send_activate_otp.tpl',
+                'subject'  => $subject,
+                ]
+            );
+        }
+
+        if (!$config['mail_otp_activation'] && $config['sms_activation']) {
+            $message = trans("Thank you for registering with :0. Your activation key is ':1'.", [_SITENAME, $data['activation_key']]);
+
+            $sendSms = $smshelper->sendSms([
+                'to'      => $save['mobile'],
+                'message' => $message,
+            ]);
+        }
+
+        if ($sendMail || $sendSms) {
+            $status           = [];
+            $status['status'] = 'OK';
+            if ($sendMail) {
+                $status['message'] = trans('OTP has been sent to '.$data['email']);
+            } else {
+                $status['message'] = trans('OTP has been sent to '.$data['mobile']);
+            }
+
+            $status['redirect'] = $this->link($url);
+
+            return $status;
+        }
     }
 }

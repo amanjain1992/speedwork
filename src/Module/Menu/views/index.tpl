@@ -1,1 +1,1 @@
-{speed layout="menu.layout.$layout" type="module"}
+{speed view="menu:layout.$layout" type="module"}

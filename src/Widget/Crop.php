@@ -14,7 +14,7 @@
  *
  * This is the base class for all JUI widget classes.
  */
-namespace Turbo\Speedwork\Widgets;
+namespace Turbo\Speedwork\Widget;
 
 use Speedwork\Core\Widget;
 
@@ -31,8 +31,8 @@ class Crop extends Widget
 
     public function beforeRun()
     {
-        $this->get('assets')->addScript('Jcrop/js/Jcrop.min.js', 'bower');
-        $this->get('assets')->addStyleSheet('Jcrop/css/Jcrop.min.css', 'bower');
+        $this->get('assets')->addScript('static::Jcrop/js/Jcrop.min.js');
+        $this->get('assets')->addStyleSheet('static::Jcrop/css/Jcrop.min.css');
     }
 
     public function run()

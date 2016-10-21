@@ -5,7 +5,7 @@
     </div>
     <div class="form-group">
         <label class="control-label">Mobile No</label>
-        <input type="text" name="data[mobile]" pattern="\+[0-9]{ldelim}10,15{rdelim}" message="Enter valid mobile number with country code" class="form-control" placeholder="+9190199xxxx">
+        <input type="text" name="data[mobile]" pattern='{speed config="auth.account.patterns.mobile"}' message="Enter valid mobile number with country code" class="form-control" placeholder="+9190199xxxx">
     </div>
     <div class="form-group">
         <label class="control-label">Login Email <small class="text-danger ac-username-message bold"></small></label>
@@ -13,7 +13,7 @@
     </div>
     <div class="form-group">
         <label class="control-label">Password</label>
-        <input class="form-control" type="password" name="password" pattern="{$config.app.patterns.password}" maxlength="15" placeholder="Password between 6 to 15 characters" message="Password must be between 6 to 15 characters length" required="required">
+        <input class="form-control" type="password" name="password" pattern='{speed config="auth.account.patterns.password"}' maxlength="15" placeholder="Password between 6 to 15 characters" message="Password must be between 6 to 15 characters length" required="required">
     </div>
     <div class="form-group">
         <label class="control-label">Confirm Password</label>

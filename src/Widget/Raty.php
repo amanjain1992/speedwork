@@ -14,7 +14,7 @@
  *
  * This is the base class for all JUI widget classes.
  */
-namespace Turbo\Speedwork\Widgets;
+namespace Turbo\Speedwork\Widget;
 
 use Speedwork\Core\Widget;
 
@@ -27,8 +27,8 @@ class Raty extends Widget
 
     public function beforeRun()
     {
-        $this->get('assets')->addStyleSheet('raty/lib/jquery.raty.css', 'bower');
-        $this->get('assets')->addScript('raty/lib/jquery.raty.js', 'bower');
+        $this->get('assets')->addStyleSheet('static::raty/lib/jquery.raty.css');
+        $this->get('assets')->addScript('static::raty/lib/jquery.raty.js');
     }
 
     public function run()

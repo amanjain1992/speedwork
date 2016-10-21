@@ -11,27 +11,26 @@
 
 use Speedwork\Database\Migration\MigrationAbstract;
 
-class CreateAddonAuditTable extends MigrationAbstract
+class CreateNotificationsTable extends MigrationAbstract
 {
     /**
      * Run the migrations.
      */
     public function up()
     {
-        $table = $this->getSchema()->createTable('#__addon_audit');
+        $table = $this->getSchema()->createTable('#__notifications');
 
-        $table->addColumn('id', 'bigint')->setLength(20)
+        $table->addColumn('id', 'bigint')
                 ->setUnsigned(true)
                 ->setAutoincrement(true);
 
         $table->addColumn('user_id', 'string')->setLength(10)->setNotNull(true);
-        $table->addColumn('table_name', 'string')->setLength(50)->setNotNull(true);
-        $table->addColumn('route', 'string')->setLength(50)->setNotNull(true);
-        $table->addColumn('sql_query', 'text')->setNotNull(true);
-        $table->addColumn('meta', 'text')->setNotNull(true);
-        $table->addColumn('ip', 'string')->setLength(25)->setNotNull(true);
-        $table->addColumn('type', 'string')->setLength(15)->setNotNull(true);
+        $table->addColumn('noty_group', 'integer');
+        $table->addColumn('message', 'text')->setNotNull(true);
+        $table->addColumn('meta', 'text');
         $table->addColumn('created', 'integer', ['length' => 10, 'notnull' => true]);
+        $table->addColumn('modified', 'integer', ['length' => 10, 'notnull' => true]);
+        $table->addColumn('status', 'integer', ['length' => 1, 'notnull' => true]);
 
         $table->setPrimaryKey(['id']);
         $table->addIndex(['user_id'], 'user_id');
@@ -45,6 +44,6 @@ class CreateAddonAuditTable extends MigrationAbstract
      */
     public function down()
     {
-        $this->getSchema()->dropTable('#__addon_audit');
+        $this->getSchema()->dropTable('#__notifications');
     }
 }

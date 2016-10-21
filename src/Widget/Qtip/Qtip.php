@@ -24,10 +24,10 @@ class Qtip extends Widget
      */
     public function beforeRun()
     {
-        $this->get('assets')->addScript(__DIR__.'/assets/jquery.qtip.min.js');
-        $this->get('assets')->addScript(__DIR__.'/assets/easytip1.js');
-        $this->get('assets')->addScript(__DIR__.'/assets/tooltip.js');
-        $this->get('assets')->addStyleSheet(__DIR__.'/assets/jquery.qtip.min.css');
+        $this->get('assets')->addScript('assets::jquery.qtip.min.js');
+        $this->get('assets')->addScript('assets::easytip1.js');
+        $this->get('assets')->addScript('assets::tooltip.js');
+        $this->get('assets')->addStyleSheet('assets::jquery.qtip.min.css');
     }
 
     /**

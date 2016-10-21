@@ -1,5 +1,5 @@
 $(document).ready(function(){
-    
+
     $(document).on('click', '.qtipbox,[tooltip="box"]', function(e) {
         $(this).easyTip();
         e.preventDefault();
@@ -84,4 +84,36 @@ $(document).ready(function(){
     $(document).on('click', '.ac-close-qtip', function() {
         $("*").qtip('hide');
     });
+
+    $(document).on('click', '[tooltip="noty"]', function(e) {
+
+        if ($(this).hasClass('noty-visible')) {
+            $("*").qtip('hide');
+            return false;
+        }
+
+        $(this).addClass('noty-visible');
+        $(this).find('.badge').html('');
+
+        $(this).easyTip({
+            content : {
+                title : {
+                    button : false
+                }
+            },
+            hide: {
+                event: 'unfocus',
+                delay: 200
+            },
+            events : {
+                show : null,
+                hide:function(event, api){
+                    var self   = api.elements.target;
+                    self.removeClass('noty-visible');
+                }
+            }
+        });
+        e.preventDefault();
+    });
+
 });

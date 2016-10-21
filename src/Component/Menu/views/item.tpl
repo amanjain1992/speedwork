@@ -42,7 +42,7 @@
             <td><strong>Parent Item</strong></td>
             <td>
                 <div style="height:220px; overflow:auto">
-                    <input type="radio" name="category[]" {if $row.parent_id}{else}checked="checked"{/if} class="liChild_415  liParent_0" value="0"> None
+                    <input type="radio" name="category[]" {if $row.parent_id}{else}checked="checked"{/if} value="0"> None
                     {$menutree}
                 </div>
             </td>
@@ -87,7 +87,7 @@
             </td>
         </tr>
     </table>
-    <input type="hidden" name="id" value="{$row.menu_id}" />
+    <input type="hidden" name="id" value="{$row.id}" />
     <input type="hidden" name="menu_type" value="{$menu_type}" />
     <input type="hidden" name="task" value="save" />
 </form>

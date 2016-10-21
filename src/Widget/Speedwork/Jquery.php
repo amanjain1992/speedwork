@@ -17,7 +17,7 @@ class Jquery extends Widget
 {
     public function beforeRun()
     {
-        $this->get('assets')->addScript('jquery/dist/jquery.min.js', 'bower');
+        $this->get('assets')->addScript('static::jquery/dist/jquery.min.js');
     }
 
     public function run()

@@ -27,6 +27,7 @@ class CreateUsersApiTable extends MigrationAbstract
         $table->addColumn('user_id', 'string', ['length' => 10]);
         $table->addColumn('api_key', 'string', ['length' => 100]);
         $table->addColumn('api_secret', 'string', ['length' => 250]);
+        $table->addColumn('signature', 'smallint', ['length' => 1, 'default' => 1]);
         $table->addColumn('allowed_ip', 'text');
         $table->addColumn('created', 'integer', ['length' => 10]);
         $table->addColumn('modified', 'integer', ['length' => 10]);

@@ -26,18 +26,17 @@ class Controller extends BaseController
     public function index()
     {
         // Condition.
-        $conditions = $this->get('resolver')->conditions($this->get);
+        $conditions = $this->get('resolver')->conditions($this->query());
         // Ordered by.
-        $order = $this->get('resolver')->ordering($this->get, ['id DESC']);
+        $order = $this->get('resolver')->ordering($this->query(), ['id DESC']);
 
-        $rows = $this->database->paginate(
-            '#__core_menu_types', 'all', [
+        $rows = $this->database->paginate('#__core_menu_types', 'all', [
                 'conditions' => $conditions,
                 'order'      => $order,
             ]
         );
         // Assign data.
-        $this->ajaxRequest('index.php?option=menu', $rows['total']);
+        $this->ajax('index.php?option=menu', $rows['total']);
 
         return ['rows' => $rows];
     }
@@ -47,19 +46,20 @@ class Controller extends BaseController
      */
     public function add()
     {
-        $task = $this->post['task'];
-        $id   = $this->post['id'];
+        $task = $this->post('task');
+        $id   = $this->post('id');
 
         $status = [];
 
         if ($task == 'save') {
             //check if this id is belong to this user
-            $save = $this->post['data'];
+            $save = $this->post('data');
 
             $status = [];
 
             if ($id) {
-                $res               = $this->database->update('#__core_menu_types', $save, ['id' => $id]);
+                $res = $this->database->update('#__core_menu_types', $save, ['id' => $id]);
+
                 $status['status']  = ($res) ? 'OK' : 'ERROR';
                 $status['message'] = ($res) ? trans('Updated Successfully') : trans('Some Error Occured');
             } else {
@@ -85,7 +85,7 @@ class Controller extends BaseController
             return $status;
         }
 
-        $id = $this->get['id'];
+        $id = $this->query('id');
 
         if (isset($id)) {
             $row = $this->database->find('#__core_menu_types', 'first', [
@@ -104,7 +104,7 @@ class Controller extends BaseController
      */
     public function delete()
     {
-        $id = $this->get['id'];
+        $id = $this->query('id');
 
         $status = [];
 
@@ -123,13 +123,13 @@ class Controller extends BaseController
      */
     public function items()
     {
-        $task = $this->data['task'];
+        $task = $this->input('task');
 
         if ($task == 'delete') {
-            $id = $this->get['id'];
+            $id = $this->query('id');
 
             $status            = [];
-            $res               = $this->database->delete('#__core_menu', ['menu_id' => $id]);
+            $res               = $this->database->delete('#__core_menu', ['id' => $id]);
             $status['status']  = ($res) ? 'OK' : 'ERROR';
             $status['message'] = ($res) ? trans('Deleted successfully..') : trans('An error occured');
 
@@ -137,8 +137,8 @@ class Controller extends BaseController
         }
 
         if ($task == 'status') {
-            $id  = $this->get['id'];
-            $res = $this->database->update('#__core_menu', ['status' => $this->get['status']], ['menu_id' => $id]);
+            $id  = $this->query('id');
+            $res = $this->database->update('#__core_menu', ['status' => $this->query('status')], ['id' => $id]);
 
             $status            = [];
             $status['status']  = ($res) ? 'OK' : 'ERROR';
@@ -148,15 +148,15 @@ class Controller extends BaseController
         }
 
         if ($task == 'sorting') {
-            $sorting = $this->data['sorting'];
-            $this->get('resolver')->helper('Speed')->sorting('#__core_menu', $sorting, 'menu_id');
+            $sorting = $this->input('sorting');
+            $this->get('resolver')->helper('Speed')->sorting('#__core_menu', $sorting, 'id');
         }
 
-        $conditions = $this->get('resolver')->conditions($this->data);
+        $conditions = $this->get('resolver')->conditions($this->input());
 
-        $order = $this->get('resolver')->ordering($this->data, ['parent_id ASC', 'ordering']);
+        $order = $this->get('resolver')->ordering($this->input(), ['parent_id ASC', 'ordering']);
 
-        $menu_type    = $this->data['t'];
+        $menu_type    = $this->input('t');
         $conditions[] = ['menu_type' => $menu_type];
 
         // List the signatures.
@@ -171,7 +171,7 @@ class Controller extends BaseController
         foreach ($rows['data'] as &$row) {
             if ($row['parent_id'] && !isset($item[$row['parent_id']])) {
                 $menu = $this->database->find('#__core_menu', 'first', [
-                    'conditions' => ['menu_id' => $row['parent_id']],
+                    'conditions' => ['id' => $row['parent_id']],
                     'fields'     => ['name'],
                 ]);
 
@@ -183,7 +183,7 @@ class Controller extends BaseController
         }
 
         // Assign data.
-        $this->ajaxRequest('index.php?option=menu&view=items&t='.$menu_type, $rows['total']);
+        $this->ajax('index.php?option=menu&view=items&t='.$menu_type, $rows['total']);
 
         return ['rows' => $rows, 'menu_type' => $menu_type];
     }
@@ -193,28 +193,27 @@ class Controller extends BaseController
      */
     public function item()
     {
-        $task      = $this->post['task'];
-        $id        = $this->post['id'];
-        $menu_id   = $this->get['menu_id'];
-        $menu_type = $this->data['menu_type'];
+        $task      = $this->post('task');
+        $id        = $this->input('id');
+        $menu_type = $this->input('menu_type');
 
         $status = [];
 
         if ($task == 'save') {
             //check if this id is belong to this user
-            $save = $this->post['data'];
+            $save = $this->post('data');
             $attr = [];
-            $keys = count($this->post['key']);
+            $keys = count($this->post('key'));
 
             for ($i = 0; $i < $keys; ++$i) {
-                if (empty($this->post['key'][$i])) {
+                if (empty($this->post('key')[$i])) {
                     continue;
                 }
 
-                $attr[$this->post['key'][$i]] = $this->post['value'][$i];
+                $attr[$this->post('key')[$i]] = $this->post('value')[$i];
             }
             $save['attributes'] = json_encode($attr);
-            $save['parent_id']  = $this->post['category'][0];
+            $save['parent_id']  = $this->post('category')[0];
             $save['link']       = $this->model->fixLink($save['link']);
 
             $status = [];
@@ -225,7 +224,8 @@ class Controller extends BaseController
                     $status['status']  = 'ERROR';
                     $status['message'] = trans('Can not be a submenu for itself.');
                 } else {
-                    $res               = $this->database->update('#__core_menu', $save, ['menu_id' => $id]);
+                    $res = $this->database->update('#__core_menu', $save, ['id' => $id]);
+
                     $status['status']  = ($res) ? 'OK' : 'ERROR';
                     $status['message'] = ($res) ? trans('Updated Successfully') : trans('Some Error Occured');
                 }
@@ -241,9 +241,9 @@ class Controller extends BaseController
             return $status;
         }
 
-        if ($menu_id) {
+        if ($id) {
             $row = $this->database->find('#__core_menu', 'first', [
-                'conditions' => ['menu_id' => $menu_id],
+                'conditions' => ['id' => $id],
                 'ignore'     => true,
             ]);
 
@@ -252,8 +252,8 @@ class Controller extends BaseController
             }
         }
 
-        $menu_helper = $this->get('resolver')->helper('menu');
-        $menutree    = $menu_helper->menuSelect($menu_type, false, $row['parent_id'], false, 1, true);
+        $menuHelper = $this->get('resolver')->helper('menu.menu');
+        $menutree   = $menuHelper->menuSelect($menu_type, false, $row['parent_id'], false, 1, true);
 
         return [
             'menutree'  => $menutree,

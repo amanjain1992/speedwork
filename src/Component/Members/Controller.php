@@ -26,15 +26,15 @@ class Controller extends BaseController
     public function beforeRender()
     {
         $this->afterlogin = config('auth.account.onlogin');
-        $this->get('assets')->addScript(__DIR__.'/assets/script.js');
+        $this->get('assets')->addScript('assets::members.js');
     }
 
     /* DEFAULT */
     public function index()
     {
-        $task = $this->data['task'];
+        $task = $this->input('task');
         if ($task == 'auto') {
-            $term = $this->data['q'];
+            $term = $this->input('q');
 
             $rows = $this->database->find('#__users_view', 'all', [
                 'conditions' => [
@@ -77,10 +77,10 @@ class Controller extends BaseController
             return $this->redirect($this->afterlogin);
         }
 
-        $task = $this->data['task'];
+        $task = $this->input('task');
 
         if ($task == 'validate') {
-            $save = $this->post['data'];
+            $save = $this->post('data');
 
             return $this->model->validate($save);
         }
@@ -100,15 +100,15 @@ class Controller extends BaseController
         }
 
         //validate token
-        if (true !== $token = $this->resolver()->helper('security')->isValidToken($this->post['token'])
+        if (true !== $token = $this->resolver()->helper('security')->isValidToken($this->post('token'))
         ) {
             return $token;
         }
 
-        $data = $this->post['data'];
+        $data = $this->post('data');
 
-        if ($this->post['password']) {
-            $data['password'] = $this->post['password'];
+        if ($this->post('password')) {
+            $data['password'] = $this->post('password');
         }
 
         $response = $this->model->register($data);
@@ -128,24 +128,17 @@ class Controller extends BaseController
             return $this->redirect($this->afterlogin);
         }
 
-        if (isset($this->post['username'])) {
-            //validate token
-            if (true !== $token = $this
-                ->resolver->helper('security')
-                ->isValidToken($this->post['token'])) {
-                return $token;
-            }
-
-            $referer = $this->server['HTTP_REFERER'];
-            $next    = $this->get('session')->get('login.next');
-            $data    = $this->post;
+        if ($this->post('username')) {
+            $referer = $this->server('HTTP_REFERER');
+            $next    = $this->getSession('login.next');
+            $data    = $this->post();
 
             $data['next'] = $next ?: $referer;
 
             return $this->model->login($data);
         }
 
-        $this->get('session')->set('login.next', urldecode($this->data['next']));
+        $this->setSession('login.next', urldecode($this->input('next')));
 
         $social = config('auth.account.social');
         if ($social['login'] === true) {
@@ -160,12 +153,12 @@ class Controller extends BaseController
 
     public function auth()
     {
-        $key    = $this->get['key'];
-        $userid = $this->get['id'];
-        $time   = $this->get['t'];
+        $key    = $this->query('key');
+        $userid = $this->query('id');
+        $time   = $this->query('t');
 
         $time_check = true;
-        if ($this->get['s']) {
+        if ($this->query('s')) {
             $data = $this->model->tokenValidate(true);
             if (!is_numeric($data['data']['userid'])) {
                 return [
@@ -213,16 +206,14 @@ class Controller extends BaseController
             ];
         }
 
-        $redirect = ($this->get['redirect']) ? $this->get['redirect'] : $this->afterlogin;
+        $redirect = ($this->query('redirect')) ? $this->query('redirect') : $this->afterlogin;
 
         $this->get('acl')->logout();
         foreach ($fields as $field) {
             $login = $this->get('acl')->LogUserIn($row[$field], $key, false, false);
 
             if ($login === true) {
-                $this->redirect($redirect);
-
-                return true;
+                return $this->redirect($redirect);
             }
         }
 
@@ -236,22 +227,25 @@ class Controller extends BaseController
     public function logout()
     {
         $this->get('acl')->logout();
-        $last = config('auth.account.onlogout');
+        $last = $this->config('auth.account.onlogout');
+        $last = $last ?: '/';
 
         $this->redirect($last);
+
+        return [
+            'status'   => 'OK',
+            'message'  => trans('Logged out successfully.'),
+            'redirect' => $last,
+        ];
     }
 
     /* CHANGE PASSWORD */
     public function changepass()
     {
-        if (!$this->is_user_logged_in) {
-            return $this->redirect('index.php?option=members&view=login');
-        }
-
-        if (!empty($this->post['password'])) {
-            $newpass      = $this->post['password'];
-            $repass       = $this->post['repassword'];
-            $old_password = $this->post['oldpassword'];
+        if (!empty($this->post('password'))) {
+            $newpass      = $this->post('password');
+            $repass       = $this->post('repassword');
+            $old_password = $this->post('oldpassword');
 
             $status = [];
 
@@ -271,7 +265,7 @@ class Controller extends BaseController
                 return $status;
             }
 
-            if (!preg_match('/'.config('app.patterns.password').'/', $this->post['password'])) {
+            if (!preg_match('/'.config('app.patterns.password').'/', $this->post('password'))) {
                 $status['status']  = 'ERROR';
                 $status['message'] = trans('Password does not meet required complexity');
 
@@ -282,22 +276,17 @@ class Controller extends BaseController
 
             if ($res) {
                 //call the hooks
-                $this->dispatch(
-                    'members.after.changepass', [
+                $this->fire('members.after.changepass', [
                     'userid'       => $this->userid,
                     'old_password' => $old_password,
                     'new_password' => $newpass,
-                    ]
-                );
+                ]);
 
-                $url                = 'index.php?option=members&view=login';
+                $url = 'index.php?option=members&view=login';
+
                 $status['status']   = 'OK';
                 $status['message']  = trans('Your Password reseted successfully. Please login again.');
                 $status['redirect'] = $url;
-
-                $this->session->remove('password_change_required');
-
-                $this->redirect($url, true, 2);
             } else {
                 $status['status']  = 'ERROR';
                 $status['message'] = trans('An error occured while resetting password. Please try again...');
@@ -314,15 +303,15 @@ class Controller extends BaseController
      */
     public function changeLogin()
     {
-        $task = $this->post['task'];
+        $task = $this->post('task');
 
         if ($task == 'save') {
             $status = [];
-            $login  = $this->post['login'];
+            $login  = $this->post('login');
             $login  = ($login) ? $login : 'username';
 
             $save         = [];
-            $save[$login] = $this->post['login_field'];
+            $save[$login] = $this->post('login_field');
 
             $exist = $this->get('acl')->checkUserByLogin($save, [], true);
 
@@ -348,13 +337,13 @@ class Controller extends BaseController
 
     public function verifyLogin()
     {
-        $task   = $this->post['task'];
-        $login  = $this->post['login'];
+        $task   = $this->post('task');
+        $login  = $this->post('login');
         $login  = ($login) ? $login : 'email';
         $status = [];
 
         if ($task == 'save') {
-            $code  = $this->post['code'];
+            $code  = $this->post('code');
             $otp   = $this->get('session')->get('verify.otp');
             $field = $this->get('session')->get('verify.login');
             $id    = $this->get('userid');
@@ -402,7 +391,7 @@ class Controller extends BaseController
 
             if ($task != 'resend') {
                 $code  = substr(rand(), 0, 6);
-                $field = $this->post['login_field'];
+                $field = $this->post('login_field');
 
                 $this->get('session')->set('verify.otp', $code);
                 $this->get('session')->set('verify.login', $field);
@@ -452,13 +441,13 @@ class Controller extends BaseController
 
     public function verifyMobile()
     {
-        $task   = $this->post['task'];
-        $login  = $this->post['login'];
+        $task   = $this->post('task');
+        $login  = $this->post('login');
         $login  = ($login) ? $login : 'mobile';
         $status = [];
 
         if ($task == 'save') {
-            $code  = $this->post['code'];
+            $code  = $this->post('code');
             $otp   = $this->get('session')->get('verify.otp');
             $field = $this->get('session')->get('verify.login');
             $id    = $this->get('userid');
@@ -473,12 +462,10 @@ class Controller extends BaseController
             $save         = [];
             $save[$login] = $field;
 
-            $res = $this->database->update(
-                '#__users', $save, ['userid' => $id], [
+            $res = $this->database->update('#__users', $save, ['userid' => $id], [
                 'name'  => 'verify',
                 'field' => $login,
-                ]
-            );
+            ]);
 
             $status['status']  = ($res) ? 'OK' : 'ERROR';
             $status['message'] = ($res) ? trans(':0 Changed successfully', [ucfirst($login)]) : trans('An error occured');
@@ -493,7 +480,7 @@ class Controller extends BaseController
 
             if ($task != 'resend') {
                 $code  = substr(rand(), 0, 6);
-                $field = $this->post['login_field'];
+                $field = $this->post('login_field');
 
                 $this->get('session')->set('verify.otp', $code);
                 $this->get('session')->set('verify.login', $field);
@@ -529,7 +516,7 @@ class Controller extends BaseController
     /* RESET PASSWORD */
     public function resetpass()
     {
-        $email = strtolower(trim($this->post['reset_email']));
+        $email = strtolower(trim($this->post('reset_email')));
 
         if (!$email) {
             return;
@@ -556,11 +543,19 @@ class Controller extends BaseController
         $userid = $row['userid'];
         $name   = $row['name'];
         $email  = $row['email'];
+        $config = config('auth.account');
 
         //get encryption helper
         $encryption  = $this->getHelper('encryption');
         $emailhelper = $this->getHelper('email');
 
+        if ($config['pwreset_token_verify']) {
+            $pwd_token = substr(mt_rand(), 0, 6);
+            $this->get('session')->set('pwd_verify_token', $pwd_token);
+            $this->get('session')->set('user_data', $row);
+
+            return   $this->model->sendTokenMail($row);
+        }
         $activation_link = 'index.php?option=members&view=pwreset';
         $activation_link .= '&u='.$encryption->encrypt($userid);
         $activation_link .= '&key='.$encryption->encrypt($email);
@@ -601,10 +596,11 @@ class Controller extends BaseController
         $encryption = $this->getHelper('encryption');
 
         $status = [];
-        $do     = $this->data['do'];
-        $userid = $this->get['u'];
-        $time   = $this->get['t'];
-        $key    = $this->get['k'];
+        $do     = $this->input('do');
+        $userid = $this->query('u');
+        $time   = $this->query('t');
+        $key    = $this->query('k');
+        $task   = $this->input('task');
 
         $status['do']     = $do;
         $status['time']   = $time;
@@ -614,12 +610,11 @@ class Controller extends BaseController
         if ($do == 'verify' || $do == 'activate') {
             //is verification
             if ($do == 'verify') {
-                $userid = $this->post['u'];
-                $time   = $this->post['t'];
-                $key    = $this->post['k'];
+                $userid = $this->input('u');
+                $time   = $this->input('t');
+                $key    = $this->input('k');
             }
-
-            if ($userid == '' || $key == '') {
+            if ($userid == '' && $key == '') {
                 $status['status']  = 'ERROR';
                 $status['message'] = trans('Invalid Request. Missing activation key or userid');
 
@@ -649,21 +644,13 @@ class Controller extends BaseController
             if ($task == 'resend') {
                 $config = config('auth.account');
 
-                if ($config['activation'] && $config['sms_activation']) {
+                if ($config['activation'] && ($config['sms_activation'] || $config['mail_otp_activation'])) {
                     $activation_key = substr(mt_rand(), 0, 6);
-                    $smshelper      = $this->getHelper('sms');
 
                     $result = $this->database->update('#__users', ['activation_key' => $activation_key], ['userid' => $userid]);
 
                     if ($result) {
-                        $message = trans(':0 is your acctivation key. Thank you for registering with :1.', [$activation_key, _SITENAME]);
-
-                        $smshelper->sendSms(
-                            [
-                            'to'      => $user['mobile'],
-                            'message' => $message,
-                            ]
-                        );
+                        $this->model->sendActivateOtp($user, $activation_key);
 
                         $status['status']  = 'OK';
                         $status['message'] = trans('Activation code is resent successfully.');
@@ -704,7 +691,7 @@ class Controller extends BaseController
             }
 
             if ($result) {
-                $this->dispatch('members.after.activation', [
+                $this->fire('members.after.activation', [
                     'userid' => $userid,
                 ]);
 
@@ -712,10 +699,10 @@ class Controller extends BaseController
                 $status['status']       = 'OK';
                 $status['message']      = trans('Your account verified successfully..');
                 $status['verified']     = true;
-                $status['set_password'] = ($setpass) ? $setpass : $this->get['setp'];
+                $status['set_password'] = ($setpass) ? $setpass : $this->query('setp');
 
                 if (empty($status['set_password'])) {
-                    $status['redirect'] = 'members/login';
+                    $status['redirect'] = $this->link('members/login');
                 }
             } else {
                 $status['status']  = 'ERROR';
@@ -726,12 +713,12 @@ class Controller extends BaseController
         }
 
         if ($do == 'setpass') {
-            $userid = $this->post['u'];
-            $time   = $this->post['t'];
-            $key    = $this->post['k'];
+            $userid = $this->post('u');
+            $time   = $this->post('t');
+            $key    = $this->post('k');
 
-            $newpass = $this->post['password'];
-            $repass  = $this->post['repassword'];
+            $newpass = $this->post('password');
+            $repass  = $this->post('repassword');
 
             $userid = $encryption->decrypt($userid);
 
@@ -804,7 +791,7 @@ class Controller extends BaseController
                 return $status;
             }
 
-            $task = $this->get['task'];
+            $task = $this->query('task');
 
             //For resending the activation link to email id
             if ($task == 'resend') {
@@ -869,11 +856,11 @@ class Controller extends BaseController
 
     public function pwreset()
     {
-        $do = $this->post['do'];
+        $do = $this->post('do');
 
-        $userid = $this->data['u'];
-        $key    = trim($this->data['key']);
-        $time   = $this->data['t'];
+        $userid = $this->input('u');
+        $key    = trim($this->input('key'));
+        $time   = $this->input('t');
         $status = [];
 
         if ($userid == '' || $key == '') {
@@ -910,7 +897,7 @@ class Controller extends BaseController
         $status['status'] = 'OK';
 
         if ($do == 'pwdreset') {
-            $newpass = $this->post['password'];
+            $newpass = $this->post('password');
             $result  = $this->get('acl')->updatePassword($newpass, $userid);
 
             if ($result) {
@@ -923,20 +910,19 @@ class Controller extends BaseController
 
                 $emailhelper = $this->getHelper('email');
 
-                $emailhelper->sendEmail(
-                    [
+                $emailhelper->sendEmail([
                     'tags'     => $tags,
                     'to'       => $email,
                     'subject'  => $mailsubject,
                     'template' => 'email_send_password.tpl',
-                    ]
-                );
+                ]);
 
                 $url                = 'index.php?option=members&view=login';
                 $status['status']   = 'OK';
                 $status['message']  = trans('Your password reseted successfully');
-                $status['redirect'] = $url;
-                $this->redirect($url, true, 2);
+                $status['redirect'] = $this->link($url);
+
+                $this->redirect($url);
             } else {
                 $status['status']  = 'ERROR';
                 $status['message'] = trans('An error occured. while resetting password. Please try again.');
@@ -948,7 +934,7 @@ class Controller extends BaseController
 
     public function me()
     {
-        $task = $this->post['task'];
+        $task = $this->post('task');
         $data = &$this->post;
 
         if ($task == 'save') {
@@ -1016,9 +1002,9 @@ class Controller extends BaseController
 
     public function social()
     {
-        $network = $this->get['network'] ?: $this->session->get('network');
-        $network = $this->get['hauth.done'] ?: $network;
-        $this->get('session')->set('login.next', urldecode($this->data['next']));
+        $network = $this->query('network') ?: $this->session->get('network');
+        $network = $this->query('hauth.done') ?: $network;
+        $this->get('session')->set('login.next', urldecode($this->input('next')));
 
         $social = $this->getHelper('social.members');
         if ($social->setProvider($network)) {
@@ -1031,7 +1017,7 @@ class Controller extends BaseController
             }
 
             if ($status['redirect']) {
-                $this->redirect($status['redirect'], 2);
+                $this->redirect($status['redirect']);
             }
 
             return $status;
@@ -1047,5 +1033,55 @@ class Controller extends BaseController
     public function endpoint()
     {
         $this->getHelper('social.members')->endpoint();
+    }
+
+    /**
+     * Function to verify token sent over email for password reset.
+     *
+     * @return [type] [description]
+     */
+    public function verifyToken()
+    {
+        $task   = $this->input('task');
+        $row    = $this->get('session')->get('user_data');
+        $status = [];
+
+        if ($task == 'resend') {
+            return $this->model->sendTokenMail($row);
+        }
+
+        $encryption = $this->getHelper('encryption');
+
+        if ($task == 'verify') {
+            $code = $this->input('token');
+
+            $token  = $this->get('session')->get('pwd_verify_token');
+            $row    = $this->get('session')->get('user_data');
+            $email  = $row['email'];
+            $userid = $row['userid'];
+
+            $url = 'index.php?option=members&view=pwreset';
+            $url .= '&u='.$encryption->encrypt($userid);
+            $url .= '&key='.$encryption->encrypt($email);
+            $url .= '&t='.$encryption->encrypt(time());
+            $link = $this->link($url);
+
+            if ($code == $token) {
+                $status['status']   = 'OK';
+                $status['message']  = trans('Token verifed successfully.');
+                $status['redirect'] = $this->link($link);
+
+                return $status;
+            }
+
+            if ($code != $token) {
+                $status['status']  = 'ERROR';
+                $status['message'] = trans('Token doesnt match.please enter valid token');
+
+                return $status;
+            }
+        }
+
+        return ['row' => $row];
     }
 }

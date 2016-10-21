@@ -94,16 +94,18 @@
                 <input type="hidden" name="t" value="{$time}" />
             </form>
         </div>
-        <div class="m-t-lg">
+        <div class="m-t-lg text-center">
             <form role="easySubmit" class="form-inline" action="{speed link="index.php?option=members&view=activate"}" method="post">
-                <div class="form-group">
+                <div class="form-group ">
                     <label class="control-label">Activation key</label>
                     <input type="text" name="k" class="form-control" size="35"  required="true"/>
                 </div>
+                 <div class="form-group col-offset-3">
                 <button type="submit" name="reset" class="btn btn-large btn-primary" data-loading-text="Please wait ...">Verify Account</button>
                 <input type="hidden" name="do" value="verify" />
                 <input type="hidden" name="u" value="{$userid}" />
                 <input type="hidden" name="t" value="{$time}" />
+                </div>
             </form>
         </div>
     </div>

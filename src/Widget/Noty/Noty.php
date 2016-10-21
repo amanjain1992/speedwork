@@ -31,7 +31,7 @@ class Noty extends Widget
      */
     public function beforeRun()
     {
-        $this->get('assets')->addScript(__DIR__.'/assets/jquery.noty.min.js');
+        $this->get('assets')->addScript('assets::jquery.noty.min.js');
     }
 
     /**

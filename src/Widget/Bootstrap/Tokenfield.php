@@ -26,9 +26,9 @@ class Tokenfield extends Widget
 
     public function beforeRun()
     {
-        $this->get('assets')->addStyleSheet('bootstrap-tokenfield/dist/css/bootstrap-tokenfield.min.css', 'bower');
-        $this->get('assets')->addStyleSheet('bootstrap-tokenfield/dist/css/tokenfield-typeahead.min.css', 'bower');
-        $this->get('assets')->addScript('bootstrap-tokenfield/dist/bootstrap-tokenfield.min.js', 'bower');
+        $this->get('assets')->addStyleSheet('static::bootstrap-tokenfield/dist/css/bootstrap-tokenfield.min.css');
+        $this->get('assets')->addStyleSheet('static::bootstrap-tokenfield/dist/css/tokenfield-typeahead.min.css');
+        $this->get('assets')->addScript('static::bootstrap-tokenfield/dist/bootstrap-tokenfield.min.js');
     }
 
     public function run()

@@ -15,6 +15,9 @@ use Speedwork\Container\BootableInterface;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 
+/**
+ * @author Sankar <sankar.suda@gmail.com>
+ */
 class TurboServiceProvider extends ServiceProvider implements BootableInterface
 {
     public function register(Container $app)
@@ -41,6 +44,10 @@ class TurboServiceProvider extends ServiceProvider implements BootableInterface
                     'namespace' => '\\Turbo\\Speedwork\\Component\\Errors\\',
                     'views'     => __DIR__.'/Component/Errors/',
                 ],
+                'noty' => [
+                    'namespace' => '\\Turbo\\Speedwork\\Component\\Noty\\',
+                    'views'     => __DIR__.'/Component/Noty/',
+                ],
             ],
             'modules' => [
                 'menu' => [
@@ -60,13 +67,14 @@ class TurboServiceProvider extends ServiceProvider implements BootableInterface
             ],
         ];
 
-        $this->config('app.apps', $apps);
-        $this->config('database.migrations', [__DIR__.'/migrations/']);
+        $this->registerConfig('app.apps', $apps);
 
         if (!$app->isConsole()) {
             $routes = [
-                'docs/([0-9\.]+)/(.*)' => 'index.php?option=docs&version=$1&page=$2',
-                'logsin'               => 'index.php?option=members&view=login',
+                'register' => 'index.php?option=members&view=register',
+                'login'    => 'index.php?option=members&view=login',
+                'logout'   => 'index.php?option=members&view=logout',
+                'me'       => 'index.php?option=members&view=me',
             ];
 
             $this->setRoutes($routes);
@@ -77,6 +85,20 @@ class TurboServiceProvider extends ServiceProvider implements BootableInterface
             $app['resolver']->widget('speedwork');
             $app['resolver']->widget('noty');
             $app['resolver']->widget('qtip');
+            $app['resolver']->widget('jui.autocomplete');
+
+            $this->registerConfig('mail.templates', [__DIR__.'/Resource/mail/']);
+        } else {
+            $this->registerConfig('database.migrations', [__DIR__.'/Resource/migrations/']);
+
+            $this->publishes([
+                __DIR__.'/Component/Members/assets/*'       => '',
+                __DIR__.'/Widget/Speedwork/assets/*.min.js' => '',
+                __DIR__.'/Widget/Noty/assets/*'             => '',
+                __DIR__.'/Widget/Nprogress/assets/*'        => '',
+                __DIR__.'/Widget/Qtip/assets/*'             => '',
+                __DIR__.'/Widget/Tinymce/assets/*'          => '',
+            ], 'assets');
         }
     }
 }

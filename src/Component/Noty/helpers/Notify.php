@@ -11,115 +11,57 @@
 
 namespace Turbo\Speedwork\Component\Noty\Helpers;
 
-use Speedwork\Core\Helper;
+use Speedwork\Core\Helper as BaseHelper;
 
 /**
  * @author sankar <sankar.suda@gmail.com>
  */
-class Notify extends Helper
+class Notify extends BaseHelper
 {
-    public function unread()
+    public function add($params = [])
     {
-        $relNum = 1;
-        $uid    = $this->userid;
-
-        $count      = 0;
-        $parent     = $this->parentDetails($uid);
-        $user2Notes = [];
-
-        while ($parent) {
-            $uid   = $parent['fkuserid'];
-            $notes = $this->database->find('#__notifications', 'all', [
-                'conditions' => [
-                    'user_id' => $uid,
-                    'role_id' => $this->user['role_id'],
-                    'status'  => 1,
-                ],
-                'ignore' => true,
-                ]
-            );
-            foreach ($notes as $note) {
-                $check = $this->database->find('#__notification_status', 'count', [
-                        'conditions' => ['user_id' => $this->userid, 'noty_id' => $note['id']],
-                    ]
-                );
-                if ($check == 0) {
-                    ++$count;
-                    $user2Notes[] = $note['id'];
-                }
-            }
-
-            $relNum = ++$relNum;
-            $parent = $this->parentDetails($uid);
+        $details = [];
+        if (!empty($params['user_id'])) {
+            $details = ['ignore' => true];
         }
 
-        $data          = [];
-        $data['count'] = $count;
-        $data['notes'] = $user2Notes;
+        $save               = [];
+        $save['created']    = time();
+        $save['status']     = 0;
+        $save['meta']       = json_encode($params['meta']);
+        $save['message']    = $params['message'];
+        $save['user_id']    = $params['user_id'];
+        $save['noty_group'] = $params['group'];
 
-        return $data;
+        $this->database->save('#__notifications', $save, $details);
+
+        return $this;
     }
 
     public function unreadCount()
     {
-        $joins   = [];
-        $joins[] = [
-            'table'      => '#__notification_status',
-            'alias'      => 's',
-            'type'       => 'LEFT',
-            'conditions' => ['s.fkuserid' => $this->userid, 'n.id = s.noty_id'],
-        ];
+        return $this->database->find('#__notifications', 'count', [
+            'conditions' => ['status' => 0],
+        ]);
+    }
 
-        return $this->database->find(
-            '#__notifications', 'count', [
-                'alias'      => 'n',
-                'conditions' => ['n.status' => 1, 's.fkuserid IS NULL'],
-                'order'      => ['n.created DESC'],
-                'joins'      => $joins,
-            ]
+    public function mark($id = null)
+    {
+        $conditions = [];
+        if ($id !== null) {
+            $conditions[] = ['id' => $id];
+        }
+
+        $this->database->update('#__notifications',
+            ['status' => 1, 'modified' => time()],
+            $conditions
         );
     }
 
-    public function listNotes()
+    public function format($row)
     {
-        //list notification which are not read yet
-        $joins   = [];
-        $joins[] = [
-            'table'      => '#__notification_status',
-            'alias'      => 's',
-            'type'       => 'LEFT',
-            'conditions' => ['s.fkuserid' => $this->userid, 'n.id = s.noty_id'],
-        ];
+        $row['meta'] = json_decode($row['meta'], true);
 
-        $rows = $this->database->find(
-            '#__notifications', 'all', [
-                'alias'      => 'n',
-                'conditions' => ['n.status' => 1, 's.fkuserid IS NULL'],
-                'fields'     => ['n.id', 'n.message', 'n.created'],
-                'order'      => ['n.created DESC'],
-                'limit'      => 10,
-                'joins'      => $joins,
-            ]
-        );
-
-        $this->mark($rows);
-
-        return $rows;
-    }
-
-    public function mark(&$rows)
-    {
-        $save = [];
-        foreach ($rows as $row) {
-            $save[] = [
-                'noty_id'  => $row['id'],
-                'fkuserid' => $this->userid,
-                'created'  => time(),
-            ];
-        }
-
-        if (!empty($save)) {
-            $this->database->save('#__notification_status', $save);
-        }
+        return $row;
     }
 }

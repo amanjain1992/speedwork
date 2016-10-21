@@ -7,7 +7,7 @@
                     <h3 class="header">Create an account</h3>
                 </div>
                 <div class="panel-body">
-                    {speed view="members.layout.register"}
+                    {speed view="members:layout.register"}
                 </div>
             </div>
         </div>
@@ -20,7 +20,7 @@
                     <h3 class="header">Create an account</h3>
                 </div>
                 <div class="panel-body">
-                    {speed view="members.layout.socialr"}
+                    {speed view="members:layout.socialr"}
                 </div>
             </div>
             <div class="text-center" style="margin-top:30px;">
@@ -34,7 +34,7 @@
                     <h3 class="header">Create an account</h3>
                 </div>
                 <div class="panel-body">
-                    {speed view="members.layout.register"}
+                    {speed view="members:layout.register"}
                 </div>
             </div>
             <div class="text-center" style="margin-top:30px;">

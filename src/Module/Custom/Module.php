@@ -9,7 +9,7 @@
  * file that was distributed with this source code
  */
 
-namespace Turbo\Speedwork\ModuleCustom;
+namespace Turbo\Speedwork\Module\Custom;
 
 use Speedwork\Core\Module as BaseModule;
 
@@ -22,7 +22,8 @@ class Module extends BaseModule
     {
         if ($options['custom_content']) {
             //if found content send to content helper to replace tags
-            $options['custom_content'] = $this->get('resolver')->helper('content')->index($options['custom_content']);
+            $content                   = $this->get('resolver')->helper('content.content');
+            $options['custom_content'] = $content->index($options['custom_content']);
         }
 
         return [

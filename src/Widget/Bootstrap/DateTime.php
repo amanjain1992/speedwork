@@ -9,22 +9,16 @@
  * file that was distributed with this source code
  */
 
-/**
- * JuiWidget class file.
- *
- * This is the base class for all JUI widget classes.
- */
 namespace Turbo\Speedwork\Widget\Bootstrap;
 
 use Speedwork\Core\Widget;
 
-class DateTime extends Widget
+class Datetime extends Widget
 {
     public function beforeRun()
     {
-        $this->get('resolver')->widget('moment');
-        $this->get('assets')->addStyleSheet('eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css', 'bower');
-        $this->get('assets')->addScript('eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js', 'bower');
+        $this->get('assets')->addStyleSheet('static::eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
+        $this->get('assets')->addScript('static::eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
     }
 
     public function run()

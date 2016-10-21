@@ -7,7 +7,7 @@
                     <h3 class="header">Login to your account</h3>
                 </div>
                 <div class="panel-body">
-                    {speed view="members.layout.login"}
+                    {speed view="members:layout.login"}
                 </div>
             </div>
         </div>
@@ -20,7 +20,7 @@
                     <h3 class="header">Login to your account</h3>
                 </div>
                 <div class="panel-body">
-                    {speed view="members.layout.social"}
+                    {speed view="members:layout.social"}
                 </div>
             </div>
         </div>
@@ -31,7 +31,7 @@
                     <h3 class="header">Login to your account</h3>
                 </div>
                 <div class="panel-body">
-                    {speed view="members.layout.login"}
+                    {speed view="members:layout.login"}
                 </div>
             </div>
         </div>

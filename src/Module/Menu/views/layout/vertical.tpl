@@ -6,7 +6,7 @@
             {if $item.childs}
             <ul class="dropdown-menu">
                 {foreach $item.childs as $child}
-                    <li><a href="{$child.url}" title="{$child.name}">{$child.name}</a></li>
+                    <li><a href="{$child.url}" title="{$child.name}"><i {$child.iattr}></i>{$child.name}</a></li>
                 {/foreach}
             </ul>
             {/if}

@@ -30,10 +30,15 @@ class Speedwork extends Widget
 
     public function beforeRun()
     {
-        $source = 'min/{script}.min.js';
-        $source = '{script}.js';
-        foreach ($this->scripts as $script) {
-            $this->get('assets')->addScript(__DIR__.'/assets/'.str_replace('{script}', $script, $source));
+        $all = false;
+
+        if ($all) {
+            $source = '{script}.js';
+            foreach ($this->scripts as $script) {
+                $this->get('assets')->addScript('assets::speedwork/'.str_replace('{script}', $script, $source));
+            }
+        } else {
+            $this->get('assets')->addScript('assets::speedwork.min.js');
         }
     }
 

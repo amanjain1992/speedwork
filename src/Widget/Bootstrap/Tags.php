@@ -22,8 +22,8 @@ class Tags extends Widget
 {
     public function beforeRun()
     {
-        $this->get('assets')->addStyleSheet('bootstrap-tagsinput/dist/bootstrap-tagsinput.css', 'bower');
-        $this->get('assets')->addScript('bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js', 'bower');
+        $this->get('assets')->addStyleSheet('static::bootstrap-tagsinput/dist/bootstrap-tagsinput.css');
+        $this->get('assets')->addScript('static::bootstrap-tagsinput/dist/bootstrap-tagsinput.min.js');
     }
 
     public function run()

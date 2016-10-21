@@ -36,7 +36,7 @@ class Controller extends BaseController
      */
     public function index()
     {
-        $source = $this->post['source'];
+        $source = $this->post('source');
         $source = str_replace(['./', '..'], '', $source);
         $source = trim(trim($source), '/');
 
@@ -69,7 +69,7 @@ class Controller extends BaseController
 
     public function upload()
     {
-        $task = $this->data['task'];
+        $task = $this->input('task');
 
         if ($task == 'save') {
             $file = $_FILES['image'];

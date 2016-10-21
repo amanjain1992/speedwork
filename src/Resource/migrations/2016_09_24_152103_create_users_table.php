@@ -28,7 +28,7 @@ class CreateUsersTable extends MigrationAbstract
         $table->addColumn('token', 'string')->setLength(150)->setNotNull(true);
         $table->addColumn('mobile', 'string')->setLength(25)->setNotNull(true);
         $table->addColumn('first_name', 'string')->setLength(50)->setNotNull(true);
-        $table->addColumn('last_name', 'string')->setLength(50)->setNotNull(true);
+        $table->addColumn('last_name', 'string')->setLength(50)->setNotNull(false);
         $table->addColumn('gender', 'string')->setLength(10)->setNotNull(true);
         $table->addColumn('avatar', 'string')->setLength(100)->setNotNull(true);
         $table->addColumn('activation_key', 'string')->setLength(100)->setNotNull(true);

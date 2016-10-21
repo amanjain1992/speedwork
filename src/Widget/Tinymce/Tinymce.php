@@ -53,7 +53,7 @@ class Tinymce extends Widget
      */
     public function beforeRun()
     {
-        $this->get('assets')->addScript(__DIR__.'/assets/tinymce.js');
+        $this->get('assets')->addScript('assets::tinymce.js');
     }
 
     /**

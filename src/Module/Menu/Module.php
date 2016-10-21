@@ -9,7 +9,7 @@
  * file that was distributed with this source code
  */
 
-namespace Turbo\Speedwork\ModuleMenu;
+namespace Turbo\Speedwork\Module\Menu;
 
 use Speedwork\Core\Module as BaseModule;
 
@@ -22,7 +22,7 @@ class Module extends BaseModule
     {
         $menu = $options['menu'];
         if ($menu) {
-            $menuHelper = $this->get('resolver')->helper('menu');
+            $menuHelper = $this->get('resolver')->helper('menu.menu');
             $layout     = $options['layout'];
             if (empty($layout)) {
                 $layout = 'bootstrap';

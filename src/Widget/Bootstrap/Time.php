@@ -22,8 +22,8 @@ class Time extends Widget
 {
     public function beforeRun()
     {
-        $this->get('assets')->addStyleSheet('bootstrap-timepicker/css/bootstrap-timepicker.min.css', 'bower');
-        $this->get('assets')->addScript('bootstrap-timepicker/js/bootstrap-timepicker.js', 'bower');
+        $this->get('assets')->addStyleSheet('static::bootstrap-timepicker/css/bootstrap-timepicker.min.css');
+        $this->get('assets')->addScript('static::bootstrap-timepicker/js/bootstrap-timepicker.js');
     }
 
     public function run()
