@@ -40,10 +40,6 @@ class TurboServiceProvider extends ServiceProvider implements BootableInterface
                     'namespace' => '\\Turbo\\Speedwork\\Component\\Media\\',
                     'views'     => __DIR__.'/Component/Media/',
                 ],
-                'errors' => [
-                    'namespace' => '\\Turbo\\Speedwork\\Component\\Errors\\',
-                    'views'     => __DIR__.'/Component/Errors/',
-                ],
                 'noty' => [
                     'namespace' => '\\Turbo\\Speedwork\\Component\\Noty\\',
                     'views'     => __DIR__.'/Component/Noty/',
