@@ -12,7 +12,7 @@ $(document).ready(function() {
             data[field] = $this.val();
             $.ajax({
                 type: "POST",
-                url: _link('members/register?task=validate&format=jsonp'),
+                url: _link('members/register?task=validate&format=json'),
                 data: {
                     data: data
                 },

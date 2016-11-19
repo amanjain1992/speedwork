@@ -9,7 +9,7 @@
                 <input type="text" name="reset_email" class="form-control" placeholder="Enter your email address" required="required" size="35"/></td>
             </div>
             <div class="form-group">
-                <input type="submit" name="reset" value="Reset Password" class="btn btn-large btn-block btn-primary" />
+                <input type="submit" name="reset" value="Send password reset link" class="btn btn-large btn-block btn-primary" />
             </div>
         </form>
         <div class="text-center signup-now">

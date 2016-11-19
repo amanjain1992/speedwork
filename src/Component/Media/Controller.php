@@ -98,7 +98,7 @@ class Controller extends BaseController
             $directory = $this->app['path.media'];
             $filepath  = $directory.$name;
 
-            if (!$this->get('fs')->copy($tmp_name, $filepath)) {
+            if (!$this->get('files')->copy($tmp_name, $filepath)) {
                 return [
                     'status'  => 'ERROR',
                     'message' => trans('An error occured. Please try again.'),

@@ -27,6 +27,8 @@ class CreateCoreMenuTypesTable extends MigrationAbstract
         $table->addColumn('menu_type', 'string')->setLength(75)->setNotNull(true);
         $table->addColumn('title', 'string')->setLength(255)->setNotNull(true);
         $table->addColumn('descn', 'string')->setLength(255)->setNotNull(true);
+        $table->addColumn('created', 'integer')->setLength(10);
+        $table->addColumn('status', 'integer')->setLength(1)->setDefault(1);
 
         $table->setPrimaryKey(['id']);
         $table->addIndex(['menu_type'], 'menu_type');

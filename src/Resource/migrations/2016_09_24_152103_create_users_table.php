@@ -29,21 +29,23 @@ class CreateUsersTable extends MigrationAbstract
         $table->addColumn('mobile', 'string')->setLength(25)->setNotNull(true);
         $table->addColumn('first_name', 'string')->setLength(50)->setNotNull(true);
         $table->addColumn('last_name', 'string')->setLength(50)->setNotNull(false);
-        $table->addColumn('gender', 'string')->setLength(10)->setNotNull(true);
-        $table->addColumn('avatar', 'string')->setLength(100)->setNotNull(true);
-        $table->addColumn('activation_key', 'string')->setLength(100)->setNotNull(true);
-        $table->addColumn('activated_at', 'integer')->setLength(10)->setNotNull(true);
+        $table->addColumn('gender', 'string')->setLength(10)->setNotNull(false);
+        $table->addColumn('avatar', 'string')->setLength(100)->setNotNull(false);
+        $table->addColumn('activation_key', 'string')->setLength(100)->setNotNull(false);
+        $table->addColumn('activated_at', 'integer')->setLength(10)->setNotNull(false);
         $table->addColumn('last_pw_change', 'integer')->setLength(10)->setNotNull(true);
         $table->addColumn('last_signin', 'integer')->setLength(10)->setNotNull(true);
         $table->addColumn('ip', 'string')->setLength(100)->setNotNull(true);
-        $table->addColumn('meta', 'text');
+        $table->addColumn('meta', 'text')->setNotNull(false)->setDefault(null);
 
+        $table->addColumn('created', 'integer', ['length' => 10])->setDefault(0);
+        $table->addColumn('modified', 'integer', ['length' => 10])->setDefault(0);
+        $table->addColumn('deleted', 'integer', ['length' => 10])->setDefault(0);
         $table->addColumn('status', 'smallint')->setLength(1)->setDefault(1);
-        $table->addColumn('created', 'integer', ['length' => 10]);
-        $table->addColumn('modified', 'integer', ['length' => 10]);
 
         $table->setPrimaryKey(['userid'], 'userid');
         $table->addUniqueIndex(['username'], 'username');
+        $table->addUniqueIndex(['email'], 'email');
         $table->addIndex(['status'], 'status');
         $table->addIndex(['role_id'], 'role_id');
     }

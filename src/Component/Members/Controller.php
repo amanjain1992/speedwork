@@ -21,11 +21,14 @@ use Speedwork\Util\Utility;
  */
 class Controller extends BaseController
 {
-    protected $afterlogin;
+    protected $next;
 
     public function beforeRender()
     {
-        $this->afterlogin = config('auth.account.onlogin');
+        $next = $this->config('auth.account.onlogin');
+        if ($next) {
+            $this->next = $this->link($next);
+        }
         $this->get('assets')->addScript('assets::members.js');
     }
 
@@ -66,7 +69,7 @@ class Controller extends BaseController
         }
 
         if ($this->is_user_logged_in) {
-            return $this->redirect($this->afterlogin);
+            return $this->redirect($this->next);
         }
     }
 
@@ -74,7 +77,7 @@ class Controller extends BaseController
     public function register()
     {
         if ($this->is_user_logged_in) {
-            return $this->redirect($this->afterlogin);
+            return $this->redirect($this->next);
         }
 
         $task = $this->input('task');
@@ -125,22 +128,21 @@ class Controller extends BaseController
     public function login()
     {
         if ($this->is_user_logged_in) {
-            return $this->redirect($this->afterlogin);
+            return $this->redirect($this->next);
         }
 
         if ($this->post('username')) {
-            $referer = $this->server('HTTP_REFERER');
-            $next    = $this->getSession('login.next');
-            $data    = $this->post();
+            $next = $this->getSession('login.next');
+            $data = $this->post();
 
-            $data['next'] = $next ?: $referer;
+            $data['next'] = $next ?: $this->next;
 
             return $this->model->login($data);
         }
 
         $this->setSession('login.next', urldecode($this->input('next')));
 
-        $social = config('auth.account.social');
+        $social = $this->config('auth.account.social');
         if ($social['login'] === true) {
             $link = $this->getHelper('social.members');
 
@@ -206,14 +208,14 @@ class Controller extends BaseController
             ];
         }
 
-        $redirect = ($this->query('redirect')) ? $this->query('redirect') : $this->afterlogin;
+        $next = ($this->query('next')) ? $this->query('next') : $this->next;
 
         $this->get('acl')->logout();
         foreach ($fields as $field) {
             $login = $this->get('acl')->LogUserIn($row[$field], $key, false, false);
 
             if ($login === true) {
-                return $this->redirect($redirect);
+                return $this->redirect($next);
             }
         }
 
@@ -265,7 +267,7 @@ class Controller extends BaseController
                 return $status;
             }
 
-            if (!preg_match('/'.config('app.patterns.password').'/', $this->post('password'))) {
+            if (!preg_match($this->config('app.patterns.password'), $this->post('password'))) {
                 $status['status']  = 'ERROR';
                 $status['message'] = trans('Password does not meet required complexity');
 
@@ -543,7 +545,7 @@ class Controller extends BaseController
         $userid = $row['userid'];
         $name   = $row['name'];
         $email  = $row['email'];
-        $config = config('auth.account');
+        $config = $this->config('auth.account');
 
         //get encryption helper
         $encryption  = $this->getHelper('encryption');
@@ -642,7 +644,7 @@ class Controller extends BaseController
             }
 
             if ($task == 'resend') {
-                $config = config('auth.account');
+                $config = $this->config('auth.account');
 
                 if ($config['activation'] && ($config['sms_activation'] || $config['mail_otp_activation'])) {
                     $activation_key = substr(mt_rand(), 0, 6);
@@ -695,7 +697,7 @@ class Controller extends BaseController
                     'userid' => $userid,
                 ]);
 
-                $setpass                = config('auth.account.activation_set_password');
+                $setpass                = $this->config('auth.account.activation_set_password');
                 $status['status']       = 'OK';
                 $status['message']      = trans('Your account verified successfully..');
                 $status['verified']     = true;
@@ -729,7 +731,7 @@ class Controller extends BaseController
                 return $status;
             }
 
-            if (!preg_match('/'.config('app.patterns.password').'/', $newpass)) {
+            if (!preg_match($this->config('app.patterns.password'), $newpass)) {
                 $status['status']  = 'ERROR';
                 $status['message'] = trans('Password does not meet required complexity');
 
@@ -796,7 +798,7 @@ class Controller extends BaseController
             //For resending the activation link to email id
             if ($task == 'resend') {
                 $emailhelper = $this->getHelper('email');
-                $config      = config('auth.account');
+                $config      = $this->config('auth.account');
 
                 $mail_username = [];
                 foreach ($config['login_fields'] as $fields) {
