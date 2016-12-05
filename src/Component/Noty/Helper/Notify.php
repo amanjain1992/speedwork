@@ -9,7 +9,7 @@
  * file that was distributed with this source code
  */
 
-namespace Turbo\Speedwork\Component\Noty\Helpers;
+namespace Turbo\Speedwork\Component\Noty\Helper;
 
 use Speedwork\Core\Helper as BaseHelper;
 

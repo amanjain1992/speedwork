@@ -9,7 +9,7 @@
  * file that was distributed with this source code
  */
 
-namespace Turbo\Speedwork\Component\Menu\Helpers;
+namespace Turbo\Speedwork\Component\Menu\Helper;
 
 use Speedwork\Core\Helper;
 use Speedwork\Util\Utility;
