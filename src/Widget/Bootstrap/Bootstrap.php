@@ -22,7 +22,7 @@ class Bootstrap extends Widget
 {
     public function beforeRun()
     {
-        $this->get('assets')->addScript('static::bootstrap/dist/js/bootstrap.min.js');
+        $this->get('assets')->addScript('//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js');
     }
 
     public function run()

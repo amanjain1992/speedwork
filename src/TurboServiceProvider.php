@@ -91,7 +91,6 @@ class TurboServiceProvider extends ServiceProvider implements BootableInterface
                 __DIR__.'/Component/Members/assets/*'       => '',
                 __DIR__.'/Widget/Speedwork/assets/*.min.js' => '',
                 __DIR__.'/Widget/Noty/assets/*'             => '',
-                __DIR__.'/Widget/Nprogress/assets/*'        => '',
                 __DIR__.'/Widget/Qtip/assets/*'             => '',
                 __DIR__.'/Widget/Tinymce/assets/*'          => '',
             ], 'assets');

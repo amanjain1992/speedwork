@@ -25,9 +25,8 @@ class Nprogress extends Widget
      */
     public function beforeRun()
     {
-        $this->get('assets')->addScript('static::nprogress/nprogress.js');
+        $this->get('assets')->addScript('//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js');
         $this->get('assets')->addScript('assets::nprogress.js');
-        $this->get('assets')->addStyleSheet('static::nprogress/nprogress.css');
     }
 
     public function run()

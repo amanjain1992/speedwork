@@ -40,7 +40,7 @@ function displayNoty(response, callback, $this) {
         res.link.url = _link(link);
         res.link.title = "Login to your account"
     }
-        
+
     if (res.link) {
         var qtipSource = "tip-link";
         $("#" + qtipSource).remove();
@@ -88,9 +88,9 @@ function displayNoty(response, callback, $this) {
 $(document).ready(function(){
 
     $(document).on('click', '[data-href]', function(e){
-             
+
         e.preventDefault();
-    
+
         var $this  = $(this);
         var callback = $this.data('callback');
 
@@ -105,16 +105,16 @@ $(document).ready(function(){
 
 	//common delete script
 	$(document).on('click', '.ac-action-delete, [data-delete], [data-action="delete"]', function(e){
-		
+
 		if(!confirm(_e('Are you sure want to delete?'))) {
 			return false;
         }
-			
+
 		var $this  = $(this);
-    	var tag    = $this.attr('data-tag') || 'tr'; 
+    	var tag    = $this.attr('data-tag') || 'tr';
     	var parent = $this.parents(tag+':eq(0)');
         var link   = $(this).attr('href') || $this.data('delete');
-				
+
 		$.ajax({
 		   url: link,
 		   data:{format:'json'},
@@ -127,16 +127,16 @@ $(document).ready(function(){
                 displayNoty(res);
 		   }
 		});
-				
+
 		e.preventDefault();
 	});
 
 	//common delete script
-	$(document).on('click', '.ac-action-request', function(e){
-		
+	$(document).on('click', '.ac-action-request, [data-ajax]', function(e){
+
 		var $this  = $(this);
         var link   = $(this).attr('href') || $this.data('status');
-				
+
 		$.ajax({
 		   url: link,
 		   data:{format:'json'},
@@ -144,16 +144,16 @@ $(document).ready(function(){
                 displayNoty(res);
 		   }
 		});
-			
+
 		e.preventDefault();
 	});
 
     //common status change script
     $(document).on('click', '.ac-action-status a', function(e){
-        
+
         var $this = $(this);
         var parent = $this.parent('.ac-action-status');
-                
+
         $.ajax({
            url: parent.data('link'),
            data:{status:$this.data('status'), format:'json'},
@@ -165,17 +165,17 @@ $(document).ready(function(){
                displayNoty(res);
            }
         });
-                
+
         e.preventDefault();
     });
 
     //common status change script
     $(document).on('change', '.ac-action-status select', function(e){
-        
+
         var $this = $(this);
         var parent = $this.parent('.ac-action-status');
         var v = $(this).val();
-                
+
         $.ajax({
            url: parent.data('link'),
            data:{status:v, format:'json'},
@@ -183,18 +183,18 @@ $(document).ready(function(){
                displayNoty(res);
            }
         });
-                
+
         e.preventDefault();
     });
 
 	//common delete script
 	$(document).on('click', '.ac-action-request-confirm', function(e){
-		
+
 		if(!confirm(_e('Are you sure want to proceed?')))
 			return false;
 
 		var $this = $(this);
-				
+
 		$.ajax({
 		   url: $(this).attr('href'),
 		   data:{format:'json'},
@@ -202,7 +202,7 @@ $(document).ready(function(){
 			   displayNoty(res);
 		   }
 		});
-				
+
 		e.preventDefault();
 	});
 
@@ -223,7 +223,7 @@ $(document).ready(function(){
 		var form  = getForm($this);
 		$.fn.clearWatermark();
 		var base = $this.attr('base-href');
-		
+
 		if(base === undefined){
 			$this.attr('base-href', $this.attr('href'));
 		}
@@ -253,7 +253,7 @@ $(document).ready(function(){
             }).appendTo(form);
         }
 
-        form.submit(); 
+        form.submit();
     });
 
 	$(document).on('click', '[data-order]', function(e){
@@ -280,7 +280,7 @@ $(document).ready(function(){
             jQuery(this).children('i').removeClass('fa-sort-amount-asc').addClass('fa-sort-amount-desc');
         }
         var form = getForm($(this));;
-      
+
         if(form.find('.ac-sort-name').length > 0){
             jQuery('.ac-sort-name').val(name);
         } else{
@@ -291,7 +291,7 @@ $(document).ready(function(){
                 type: 'hidden'
             }).appendTo(form);
         }
-        
+
         if(form.find('.ac-sort-order').length > 0 ){
             jQuery('.ac-sort-order').val(order);
         } else{
@@ -303,7 +303,7 @@ $(document).ready(function(){
             }).appendTo(form);
         }
 
-        form.submit(); 
+        form.submit();
 
     });
 
@@ -338,7 +338,7 @@ $(document).ready(function(){
 
     		form.submit();
     		return ui;
-    	};	
+    	};
 
     	$('.table_sortable_body').sortable({
     		//containment: '.ac-ui-sortable',

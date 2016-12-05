@@ -28,9 +28,8 @@ class Jui extends Widget
      */
     public function beforeRun()
     {
-        $this->get('assets')->addStyleSheet('static::jquery-ui/themes/ui-lightness/jquery-ui.min.css');
-        $this->get('assets')->addStyleSheet('static::jquery-ui/themes/ui-lightness/theme.css');
-        $this->get('assets')->addScript('static::jquery-ui/jquery-ui.min.js');
+        $this->get('assets')->addStyleSheet('//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css');
+        $this->get('assets')->addScript('//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js');
     }
 
     public function run()
